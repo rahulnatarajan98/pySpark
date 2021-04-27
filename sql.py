@@ -6,10 +6,10 @@ from pyspark.sql import SparkSession
 class Spark():
     def __init__(self,appname):
         self.appname = appname
-        self.url = 'jdbc:postgresql://localhost:5432/dvdrental'
         self.database = 'dvdrental'
         self.username = 'postgres'
         self.password = 'password'
+        self.url = f'jdbc:postgresql://localhost:5432/{self.database}'
         self.session = None
         self.df = None
     
