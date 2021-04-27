@@ -43,6 +43,20 @@ class StartSpark():
         
         else:
             print ("No active Spark Session")
+    
+    def selectQuery(self,query='*'):
+        if self.df:
+            return self.df.select(query).show()
+        else:
+            print ("No Data Frame Available")
+    
+    def addingColumn(self,newCol,oldCol):
+        if self.df:
+            return self.df.withColumn(newCol,df[oldCol]).show()
+        else:
+            print ("No Data Frame Available")
+
+
 
 def main():
     try:
@@ -58,12 +72,15 @@ def main():
 
         df = obj.readFile(final_struc)
 
+        
+
         df.show()
         df.printSchema()
         
         
         df.select('*').show()
         df.select(['age','gender']).show()
+        print (obj.selectQuery(query=['age','gender']))
 
         df.withColumn('newAge', df['Age']+2).show()
 
