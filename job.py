@@ -13,6 +13,7 @@ class StartSpark():
         self.filepath = filepath
         self.session = None
         self.df = None
+        self.createSession()
     
     def createSession(self):
         spark = SparkSession.builder.master(self.master).appName(self.appname)
@@ -22,12 +23,8 @@ class StartSpark():
         self.session = spark.getOrCreate()
 
         return self.session
-
-    def stopsession(self):
-        self.session.stop()
-        return None
     
-    def readFile(self,final_struc):
+    def readFile(self,schema):
         if self.session:
             ext = self.filepath.split('.')[-1]
             if ext == 'txt':
@@ -35,7 +32,7 @@ class StartSpark():
             elif ext == 'json':
                 self.df = self.session.read.json(self.filepath)
             elif ext == 'csv':
-                self.df = self.session.read.option("header",True).csv(self.filepath, schema=final_struc)
+                self.df = self.session.read.option("header",True).csv(self.filepath, schema=schema)
             else:
                 print ("No extenstion found")
             
@@ -61,7 +58,6 @@ class StartSpark():
 def main():
     try:
         obj = StartSpark(appname='Test',filepath='Car_Purchasing_Data.csv')
-        spark = obj.createSession()
 
         dataSchema = [StructField('Customer Name',StringType(),True), 
             StructField('Gender',IntegerType(),True), 
@@ -70,7 +66,7 @@ def main():
         
         final_struc = StructType(fields=dataSchema)
 
-        df = obj.readFile(final_struc)
+        df = obj.readFile(schema=final_struc)
 
         
 
@@ -86,7 +82,7 @@ def main():
 
         #Creating Temproray View
         df.createOrReplaceTempView('mydata')
-        results = spark.sql("SELECT * FROM mydata")
+        results = obj.session.sql("SELECT * FROM mydata")
         results.show()
 
         #FILTER Operations
@@ -113,7 +109,7 @@ def main():
         print (e)
 
     finally:
-        spark.stop()
+        obj.session.stop()
 
 
 if __name__=='__main__':

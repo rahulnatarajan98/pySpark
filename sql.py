@@ -12,6 +12,7 @@ class Spark():
         self.url = f'jdbc:postgresql://localhost:5432/{self.database}'
         self.session = None
         self.df = None
+        self.createSession()
     
     def createSession(self):
         spark = SparkSession.builder.appName(self.appname).config("spark.jars", "dependencies/postgresql-42.2.14.jar")
@@ -43,21 +44,22 @@ class Spark():
 
 def main():
     try:
-        sparkObj = Spark(appname='Postgresql Connect')
-        
-        session = sparkObj.createSession()
+        spark = Spark(appname='Postgresql Connect')
 
-        df1 = sparkObj.readdb('actor')
-        df1.show()
+        actor = spark.readdb('actor')
+        actor.show()
 
-        df2 = sparkObj.readdb('address')
-        df2.show()
+        address = spark.readdb('address')
+        address.show()
+
+        film = spark.readdb('film')
+        film.filter((film['length']>20) & (film['length']<100)).select(['title','film_id']).show()
 
     except Exception as e:
         print (e)
     
     finally:
-        sparkObj.stopSession()
+        spark.stopSession()
 
 
 if __name__=='__main__':
