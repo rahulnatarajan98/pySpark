@@ -2,6 +2,8 @@ import findspark
 findspark.init()
 
 from pyspark.sql import SparkSession
+from pyspark.sql.types import StructField,StructType, StringType, IntegerType, DecimalType
+from pyspark.sql.functions import countDistinct, avg, stddev, format_number
 
 class StartSpark():
     def __init__(self,appname,filepath,master='local[*]',config=None):
@@ -25,7 +27,7 @@ class StartSpark():
         self.session.stop()
         return None
     
-    def readFile(self):
+    def readFile(self,final_struc):
         if self.session:
             ext = self.filepath.split('.')[-1]
             if ext == 'txt':
@@ -33,26 +35,68 @@ class StartSpark():
             elif ext == 'json':
                 self.df = self.session.read.json(self.filepath)
             elif ext == 'csv':
-                self.df = self.session.read.csv(self.filepath)
+                self.df = self.session.read.option("header",True).csv(self.filepath, schema=final_struc)
             else:
                 print ("No extenstion found")
+            
             return self.df
         
         else:
             print ("No active Spark Session")
 
 def main():
-    obj = StartSpark(appname='Test',filepath='Car_Purchasing_Data.csv')
-    spark = obj.createSession()
-    df = obj.readFile()
-    print (df)
-    df.show()
-    df.printSchema()
-    df.columns
-    df.describe()
-    df.describe().show()
-    df.select('*').show()
-    spark.stop()
+    try:
+        obj = StartSpark(appname='Test',filepath='Car_Purchasing_Data.csv')
+        spark = obj.createSession()
+
+        dataSchema = [StructField('Customer Name',StringType(),True), 
+            StructField('Gender',IntegerType(),True), 
+            StructField('Age', DecimalType(), True),
+            StructField('Annual Salary', DecimalType(), True) ]
+        
+        final_struc = StructType(fields=dataSchema)
+
+        df = obj.readFile(final_struc)
+
+        df.show()
+        df.printSchema()
+        
+        
+        df.select('*').show()
+        df.select(['age','gender']).show()
+
+        df.withColumn('newAge', df['Age']+2).show()
+
+        #Creating Temproray View
+        df.createOrReplaceTempView('mydata')
+        results = spark.sql("SELECT * FROM mydata")
+        results.show()
+
+        #FILTER Operations
+        print ("Filter Operations")
+        df.filter((df['Age'] > 30.0) & (df['Gender'] == 1) ).select('*').show()
+
+        df.filter(df['Customer Name'].rlike('^N')).show()
+
+        #Aggregate fn
+        df.groupBy("Gender").count().show()
+        df.agg({'Annual Salary': 'sum'}).show()
+
+        df.orderBy('Customer Name').show()
+        df.orderBy(df['Customer Name'].desc()).show()
+    
+        #SQL Functions
+        df.select(avg('Age').alias('avg_age')).show()
+
+        std = df.select(stddev('Age').alias('std_dev'))
+        std.select(format_number('std_dev',2).alias('StandardDeviation')).show()
+
+
+    except Exception as e:
+        print (e)
+
+    finally:
+        spark.stop()
 
 
 if __name__=='__main__':
