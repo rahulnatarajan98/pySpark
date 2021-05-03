@@ -1,3 +1,7 @@
 .vscode
 spark-warehouse
 dependencies
+.idea
+venv
+.env
+data
