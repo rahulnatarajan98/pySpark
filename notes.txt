@@ -1,0 +1,3 @@
+1. Apache Spark - spark-3.1.1-bin-hadoop2.7.tgz - https://spark.apache.org/downloads.html
+2. Winutils - https://github.com/steveloughran/winutils/tree/master/hadoop-2.7.1/bin
+3. pyspark - pip install pyspark

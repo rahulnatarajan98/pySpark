@@ -94,7 +94,7 @@ def main():
         print("\n\nTemporary View")
         df.createOrReplaceTempView('mydata')
 
-        print("\n\n Using SQL Statements")
+        print("Using SQL Statements")
         results = obj.session.sql("SELECT * FROM mydata")
         results.show()
 
@@ -108,7 +108,6 @@ def main():
         #Groupby and Orderby
         print("\n\nGroupby")
         df.groupBy("Gender").count().show()
-        df.agg({'Annual Salary': 'sum'}).show()
 
         print("\n\nOrderby - Ascending")
         df.orderBy('Customer Name').show()
@@ -119,6 +118,7 @@ def main():
         #SQL Functions
         print("\n\nAggregators")
         df.select(avg('Age').alias('avg_age')).show()
+        df.agg({'Annual Salary': 'sum'}).show()
         std = df.select(stddev('Age').alias('std_dev'))
         std.show()
 
