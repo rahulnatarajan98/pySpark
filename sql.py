@@ -74,7 +74,7 @@ def main():
 
         df = df.drop('active', 'address_id', 'last_update', 'staff_id', 'picture')
 
-        print('\n\nWrite')
+        print('\n\nWriting into file')
         
         df.write\
             .format("csv")\
